@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2020
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shuttle.Esb.Throttle", "Shuttle.Esb.Throttle\Shuttle.Esb.Throttle.csproj", "{73256553-0838-4ACC-83C9-EB5AA6488F61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shuttle.Esb.Throttle.Tests", "Shuttle.Esb.Throttle.Tests\Shuttle.Esb.Throttle.Tests.csproj", "{755525CB-7883-4759-A303-FCC84F9CE33F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F38F80ED-57A5-4D2E-8EF0-E6635163CFD3}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{73256553-0838-4ACC-83C9-EB5AA6488F61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73256553-0838-4ACC-83C9-EB5AA6488F61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73256553-0838-4ACC-83C9-EB5AA6488F61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73256553-0838-4ACC-83C9-EB5AA6488F61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{755525CB-7883-4759-A303-FCC84F9CE33F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{755525CB-7883-4759-A303-FCC84F9CE33F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{755525CB-7883-4759-A303-FCC84F9CE33F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{755525CB-7883-4759-A303-FCC84F9CE33F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DBA6CC82-2E9B-428B-B768-2E2EEF684944}
+	EndGlobalSection
+EndGlobal
