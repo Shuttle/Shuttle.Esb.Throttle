@@ -11,7 +11,7 @@ The module will attach the `ThrottleObserver` to the `OnPipelineStarting` event 
 ## Configuration
 
 ```c#
-services.AddThrottleModule(builder => 
+services.AddThrottle(builder => 
 {
 	builder.Options.CpuUsagePercentage = 65;
 	builder.Options.AbortCycleCount = 5;
