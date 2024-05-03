@@ -25,6 +25,11 @@ namespace Shuttle.Esb.Throttle
 
         public void Execute(OnPipelineStarting pipelineEvent)
         {
+            ExecuteAsync(pipelineEvent).GetAwaiter().GetResult();
+        }
+
+        public async Task ExecuteAsync(OnPipelineStarting pipelineEvent)
+        {
             if (!_policy.ShouldAbort())
             {
                 _abortCount = 0;
@@ -45,7 +50,7 @@ namespace Shuttle.Esb.Throttle
 
             try
             {
-                Task.Delay(sleep, _cancellationToken).Wait(_cancellationToken);
+                await Task.Delay(sleep, _cancellationToken);
             }
             catch (OperationCanceledException)
             {

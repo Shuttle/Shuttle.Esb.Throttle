@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Shuttle.Core.Contract;
 using Shuttle.Core.Pipelines;
+using Shuttle.Core.Threading;
 
 namespace Shuttle.Esb.Throttle
 {
@@ -14,8 +15,9 @@ namespace Shuttle.Esb.Throttle
         private readonly IPipelineFactory _pipelineFactory;
         private readonly IThrottlePolicy _policy;
         private readonly ThrottleOptions _throttleOptions;
+        private readonly CancellationToken _cancellationToken;
 
-        public ThrottleHostedService(IOptions<ThrottleOptions> throttleOptions, IPipelineFactory pipelineFactory, IThrottlePolicy policy)
+        public ThrottleHostedService(IOptions<ThrottleOptions> throttleOptions, IPipelineFactory pipelineFactory, IThrottlePolicy policy, ICancellationTokenSource cancellationTokenSource)
         {
             Guard.AgainstNull(throttleOptions, nameof(throttleOptions));
             Guard.AgainstNull(throttleOptions.Value, nameof(throttleOptions.Value));
@@ -23,6 +25,8 @@ namespace Shuttle.Esb.Throttle
             _throttleOptions = throttleOptions.Value;
             _pipelineFactory = Guard.AgainstNull(pipelineFactory, nameof(pipelineFactory));
             _policy = Guard.AgainstNull(policy, nameof(policy));
+            
+            _cancellationToken = Guard.AgainstNull(cancellationTokenSource, nameof(cancellationTokenSource)).Get().Token;
 
             _pipelineFactory.PipelineCreated += PipelineCreated;
         }
@@ -48,7 +52,7 @@ namespace Shuttle.Esb.Throttle
                 return;
             }
 
-            e.Pipeline.RegisterObserver(new ThrottleObserver(_throttleOptions, _policy, e.Pipeline.State.GetCancellationToken()));
+            e.Pipeline.RegisterObserver(new ThrottleObserver(_throttleOptions, _policy, _cancellationToken));
         }
     }
 }

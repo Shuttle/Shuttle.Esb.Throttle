@@ -27,7 +27,7 @@ namespace Shuttle.Esb.Throttle
                 options.DurationToSleepOnAbort = throttleBuilder.Options.DurationToSleepOnAbort;
             });
 
-            services.AddPipelineModule<ThrottleHostedService>();
+            services.AddHostedService<ThrottleHostedService>();
 
             return services;
         }
