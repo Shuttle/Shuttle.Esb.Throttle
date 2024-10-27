@@ -4,59 +4,52 @@ using System.Threading.Tasks;
 using Shuttle.Core.Contract;
 using Shuttle.Core.Pipelines;
 
-namespace Shuttle.Esb.Throttle
+namespace Shuttle.Esb.Throttle;
+
+public class ThrottleObserver : IPipelineObserver<OnPipelineStarting>
 {
-    public class ThrottleObserver : IPipelineObserver<OnPipelineStarting>
+    private readonly CancellationToken _cancellationToken;
+    private readonly IThrottlePolicy _policy;
+    private readonly ThrottleOptions _throttleOptions;
+    private int _abortCount;
+
+    public ThrottleObserver(ThrottleOptions throttleOptions, IThrottlePolicy policy, CancellationToken cancellationToken)
     {
-        private readonly IThrottlePolicy _policy;
-        private readonly CancellationToken _cancellationToken;
-        private readonly ThrottleOptions _throttleOptions;
-        private int _abortCount;
+        _throttleOptions = Guard.AgainstNull(throttleOptions);
+        _policy = Guard.AgainstNull(policy);
+        _cancellationToken = cancellationToken;
+    }
 
-        public ThrottleObserver(ThrottleOptions throttleOptions, IThrottlePolicy policy, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(IPipelineContext<OnPipelineStarting> pipelineContext)
+    {
+        if (!_policy.ShouldAbort())
         {
-            Guard.AgainstNull(throttleOptions, nameof(throttleOptions));
-            Guard.AgainstNull(policy, nameof(policy));
-
-            _throttleOptions = throttleOptions;
-            _cancellationToken = cancellationToken;
-            _policy = policy;
+            _abortCount = 0;
+            return;
         }
 
-        public void Execute(OnPipelineStarting pipelineEvent)
+        pipelineContext.Pipeline.Abort();
+
+        var sleep = TimeSpan.FromSeconds(1);
+
+        try
         {
-            ExecuteAsync(pipelineEvent).GetAwaiter().GetResult();
+            sleep = _throttleOptions.DurationToSleepOnAbort[_abortCount];
+        }
+        catch
+        {
+            // ignore
         }
 
-        public async Task ExecuteAsync(OnPipelineStarting pipelineEvent)
+
+        try
         {
-            if (!_policy.ShouldAbort())
-            {
-                _abortCount = 0;
-                return;
-            }
-
-            pipelineEvent.Pipeline.Abort();
-            var sleep = TimeSpan.FromSeconds(1);
-
-            try
-            {
-                sleep = _throttleOptions.DurationToSleepOnAbort[_abortCount];
-            }
-            catch
-            {
-            }
-
-
-            try
-            {
-                await Task.Delay(sleep, _cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-            }
-
-            _abortCount += _abortCount + 1 < _throttleOptions.DurationToSleepOnAbort.Count ? 1 : 0;
+            await Task.Delay(sleep, _cancellationToken);
         }
+        catch (OperationCanceledException)
+        {
+        }
+
+        _abortCount += _abortCount + 1 < _throttleOptions.DurationToSleepOnAbort.Count ? 1 : 0;
     }
 }

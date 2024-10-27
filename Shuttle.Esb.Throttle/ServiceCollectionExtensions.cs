@@ -2,35 +2,30 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Shuttle.Core.Contract;
-using Shuttle.Core.Pipelines;
 
-namespace Shuttle.Esb.Throttle
+namespace Shuttle.Esb.Throttle;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static IServiceCollection AddThrottle(this IServiceCollection services, Action<ThrottleBuilder>? builder = null)
     {
-        public static IServiceCollection AddThrottle(this IServiceCollection services, Action<ThrottleBuilder> builder = null)
+        var throttleBuilder = new ThrottleBuilder(Guard.AgainstNull(services));
+
+        builder?.Invoke(throttleBuilder);
+
+        services.TryAddSingleton<ThrottleHostedService, ThrottleHostedService>();
+        services.TryAddSingleton<ThrottleObserver, ThrottleObserver>();
+        services.TryAddSingleton<IThrottlePolicy, ThrottlePolicy>();
+
+        services.AddOptions<ThrottleOptions>().Configure(options =>
         {
-            Guard.AgainstNull(services, nameof(services));
+            options.AbortCycleCount = throttleBuilder.Options.AbortCycleCount;
+            options.CpuUsagePercentage = throttleBuilder.Options.CpuUsagePercentage;
+            options.DurationToSleepOnAbort = throttleBuilder.Options.DurationToSleepOnAbort;
+        });
 
-            var throttleBuilder = new ThrottleBuilder(services);
+        services.AddHostedService<ThrottleHostedService>();
 
-            builder?.Invoke(throttleBuilder);
-
-            services.TryAddSingleton<ThrottleHostedService, ThrottleHostedService>();
-            services.TryAddSingleton<ThrottleObserver, ThrottleObserver>();
-            services.TryAddSingleton<IThrottlePolicy, ThrottlePolicy>();
-
-            services.AddOptions<ThrottleOptions>().Configure(options =>
-            {
-                options.AbortCycleCount = throttleBuilder.Options.AbortCycleCount;
-                options.CpuUsagePercentage = throttleBuilder.Options.CpuUsagePercentage;
-                options.DurationToSleepOnAbort = throttleBuilder.Options.DurationToSleepOnAbort;
-            });
-
-            services.AddHostedService<ThrottleHostedService>();
-
-            return services;
-        }
-
+        return services;
     }
 }
