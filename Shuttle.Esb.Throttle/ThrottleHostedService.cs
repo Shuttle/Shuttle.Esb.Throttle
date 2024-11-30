@@ -49,6 +49,6 @@ public class ThrottleHostedService : IHostedService
             return;
         }
 
-        e.Pipeline.RegisterObserver(new ThrottleObserver(_throttleOptions, _policy, _cancellationToken));
+        e.Pipeline.AddObserver(new ThrottleObserver(_throttleOptions, _policy, _cancellationToken));
     }
 }
