@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Shuttle.Core.Contract;
 
 namespace Shuttle.Esb.Throttle;
@@ -17,12 +18,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<ThrottleObserver, ThrottleObserver>();
         services.TryAddSingleton<IThrottlePolicy, ThrottlePolicy>();
 
-        services.AddOptions<ThrottleOptions>().Configure(options =>
-        {
-            options.AbortCycleCount = throttleBuilder.Options.AbortCycleCount;
-            options.CpuUsagePercentage = throttleBuilder.Options.CpuUsagePercentage;
-            options.DurationToSleepOnAbort = throttleBuilder.Options.DurationToSleepOnAbort;
-        });
+        services.AddSingleton(Options.Create(throttleBuilder.Options));
 
         services.AddHostedService<ThrottleHostedService>();
 
