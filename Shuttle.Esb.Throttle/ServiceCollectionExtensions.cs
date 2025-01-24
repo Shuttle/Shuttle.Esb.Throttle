@@ -18,7 +18,12 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<ThrottleObserver, ThrottleObserver>();
         services.TryAddSingleton<IThrottlePolicy, ThrottlePolicy>();
 
-        services.AddSingleton(Options.Create(throttleBuilder.Options));
+        services.AddOptions<ThrottleOptions>().Configure(options =>
+        {
+            options.AbortCycleCount = throttleBuilder.Options.AbortCycleCount;
+            options.CpuUsagePercentage = throttleBuilder.Options.CpuUsagePercentage;
+            options.DurationToSleepOnAbort = throttleBuilder.Options.DurationToSleepOnAbort;
+        });
 
         services.AddHostedService<ThrottleHostedService>();
 
