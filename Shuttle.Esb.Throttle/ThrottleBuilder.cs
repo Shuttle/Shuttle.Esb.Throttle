@@ -2,24 +2,22 @@
 using Microsoft.Extensions.DependencyInjection;
 using Shuttle.Core.Contract;
 
-namespace Shuttle.Esb.Throttle
+namespace Shuttle.Esb.Throttle;
+
+public class ThrottleBuilder
 {
-    public class ThrottleBuilder
+    private ThrottleOptions _throttleOptions = new();
+
+    public ThrottleBuilder(IServiceCollection services)
     {
-        private ThrottleOptions _throttleOptions = new ThrottleOptions();
-        public IServiceCollection Services { get; }
-
-        public ThrottleBuilder(IServiceCollection services)
-        {
-            Guard.AgainstNull(services, nameof(services));
-
-            Services = services;
-        }
-
-        public ThrottleOptions Options
-        {
-            get => _throttleOptions;
-            set => _throttleOptions = value ?? throw new ArgumentNullException(nameof(value));
-        }
+        Services = Guard.AgainstNull(services);
     }
+
+    public ThrottleOptions Options
+    {
+        get => _throttleOptions;
+        set => _throttleOptions = Guard.AgainstNull(value);
+    }
+
+    public IServiceCollection Services { get; }
 }

@@ -1,7 +1,6 @@
-﻿namespace Shuttle.Esb.Throttle
+﻿namespace Shuttle.Esb.Throttle;
+
+public interface IThrottlePolicy
 {
-    public interface IThrottlePolicy
-    {
-        bool ShouldAbort();
-    }
+    bool ShouldAbort();
 }

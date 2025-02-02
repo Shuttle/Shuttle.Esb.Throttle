@@ -7,52 +7,48 @@ using Shuttle.Core.Contract;
 using Shuttle.Core.Pipelines;
 using Shuttle.Core.Threading;
 
-namespace Shuttle.Esb.Throttle
+namespace Shuttle.Esb.Throttle;
+
+public class ThrottleHostedService : IHostedService
 {
-    public class ThrottleHostedService : IHostedService
+    private readonly CancellationToken _cancellationToken;
+    private readonly Type _inboxMessagePipelineType = typeof(InboxMessagePipeline);
+    private readonly IPipelineFactory _pipelineFactory;
+    private readonly IThrottlePolicy _policy;
+    private readonly ThrottleOptions _throttleOptions;
+
+    public ThrottleHostedService(IOptions<ThrottleOptions> throttleOptions, IPipelineFactory pipelineFactory, IThrottlePolicy policy, ICancellationTokenSource cancellationTokenSource)
     {
-        private readonly Type _inboxMessagePipelineType = typeof(InboxMessagePipeline);
-        private readonly IPipelineFactory _pipelineFactory;
-        private readonly IThrottlePolicy _policy;
-        private readonly ThrottleOptions _throttleOptions;
-        private readonly CancellationToken _cancellationToken;
+        _throttleOptions = Guard.AgainstNull(Guard.AgainstNull(throttleOptions).Value);
+        _pipelineFactory = Guard.AgainstNull(pipelineFactory);
+        _policy = Guard.AgainstNull(policy);
 
-        public ThrottleHostedService(IOptions<ThrottleOptions> throttleOptions, IPipelineFactory pipelineFactory, IThrottlePolicy policy, ICancellationTokenSource cancellationTokenSource)
+        _cancellationToken = Guard.AgainstNull(cancellationTokenSource).Get().Token;
+
+        _pipelineFactory.PipelineCreated += PipelineCreated;
+    }
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _pipelineFactory.PipelineCreated -= PipelineCreated;
+
+        await Task.CompletedTask;
+    }
+
+    private void PipelineCreated(object? sender, PipelineEventArgs e)
+    {
+        var pipelineType = e.Pipeline.GetType();
+
+        if (pipelineType != _inboxMessagePipelineType)
         {
-            Guard.AgainstNull(throttleOptions, nameof(throttleOptions));
-            Guard.AgainstNull(throttleOptions.Value, nameof(throttleOptions.Value));
-
-            _throttleOptions = throttleOptions.Value;
-            _pipelineFactory = Guard.AgainstNull(pipelineFactory, nameof(pipelineFactory));
-            _policy = Guard.AgainstNull(policy, nameof(policy));
-            
-            _cancellationToken = Guard.AgainstNull(cancellationTokenSource, nameof(cancellationTokenSource)).Get().Token;
-
-            _pipelineFactory.PipelineCreated += PipelineCreated;
+            return;
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            await Task.CompletedTask;
-        }
-
-        public async Task StopAsync(CancellationToken cancellationToken)
-        {
-            _pipelineFactory.PipelineCreated -= PipelineCreated;
-
-            await Task.CompletedTask;
-        }
-
-        private void PipelineCreated(object sender, PipelineEventArgs e)
-        {
-            var pipelineType = e.Pipeline.GetType();
-
-            if (pipelineType != _inboxMessagePipelineType)
-            {
-                return;
-            }
-
-            e.Pipeline.RegisterObserver(new ThrottleObserver(_throttleOptions, _policy, _cancellationToken));
-        }
+        e.Pipeline.AddObserver(new ThrottleObserver(_throttleOptions, _policy, _cancellationToken));
     }
 }

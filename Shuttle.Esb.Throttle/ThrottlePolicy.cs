@@ -2,46 +2,42 @@
 using Microsoft.Extensions.Options;
 using Shuttle.Core.Contract;
 
-namespace Shuttle.Esb.Throttle
+namespace Shuttle.Esb.Throttle;
+
+public class ThrottlePolicy : IThrottlePolicy, IDisposable
 {
-    public class ThrottlePolicy : IThrottlePolicy, IDisposable
+    private readonly CpuUsage _cpuUsage;
+    private readonly ThrottleOptions _throttleOptions;
+    private int _abortCount;
+
+    public ThrottlePolicy(IOptions<ThrottleOptions> throttleOptions)
     {
-        private readonly ThrottleOptions _throttleOptions;
-        private int _abortCount;
-        private readonly CpuUsage _cpuUsage;
+        _throttleOptions = Guard.AgainstNull(Guard.AgainstNull(throttleOptions).Value);
 
-        public ThrottlePolicy(IOptions<ThrottleOptions> throttleOptions)
+        _cpuUsage = new();
+    }
+
+    public void Dispose()
+    {
+        _cpuUsage.Dispose();
+    }
+
+    public bool ShouldAbort()
+    {
+        if (_cpuUsage.Percentage > _throttleOptions.CpuUsagePercentage)
         {
-            Guard.AgainstNull(throttleOptions, nameof(throttleOptions));
-            Guard.AgainstNull(throttleOptions.Value, nameof(throttleOptions.Value));
+            _abortCount++;
 
-            _throttleOptions = throttleOptions.Value;
-
-            _cpuUsage = new CpuUsage();
-        }
-
-        public bool ShouldAbort()
-        {
-            if (_cpuUsage.Percentage > _throttleOptions.CpuUsagePercentage)
+            if (_abortCount > _throttleOptions.AbortCycleCount)
             {
-                _abortCount++;
-
-                if (_abortCount > _throttleOptions.AbortCycleCount)
-                {
-                    _abortCount = 0;
-                }
-
-                return _abortCount > 0;
+                _abortCount = 0;
             }
 
-            _abortCount = 0;
-
-            return false;
+            return _abortCount > 0;
         }
 
-        public void Dispose()
-        {
-            _cpuUsage?.Dispose();
-        }
+        _abortCount = 0;
+
+        return false;
     }
 }
