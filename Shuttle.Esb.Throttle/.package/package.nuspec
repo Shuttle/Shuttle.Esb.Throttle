@@ -13,7 +13,7 @@
 		<repository type="git" url="https://github.com/shuttle/Shuttle.Esb.Throttle.git" />
 		<projectUrl>https://github.com/shuttle/Shuttle.Esb.Throttle</projectUrl>
 		<description>The Throttle module for Shuttle.Esb aborts pipeline processing when the throttle parameters are exceeded.</description>
-		<copyright>Copyright (c) 2024, Eben Roux</copyright>
+		<copyright>Copyright (c) 2025, Eben Roux</copyright>
 		<tags></tags>
 		<dependencies>
       <dependency id="Shuttle.Esb" version="20.0.0" />
