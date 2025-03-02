@@ -18,7 +18,7 @@ public class CpuUsage : IDisposable
         {
             while (!_cancellationTokenSource.IsCancellationRequested)
             {
-                var startTime = DateTime.UtcNow;
+                var startTime = DateTimeOffset.UtcNow;
                 var startTotalProcessorTime = Process.GetCurrentProcess().TotalProcessorTime;
 
                 try
@@ -34,7 +34,7 @@ public class CpuUsage : IDisposable
                     return;
                 }
 
-                var endTime = DateTime.UtcNow;
+                var endTime = DateTimeOffset.UtcNow;
                 var endTotalProcessorTime = Process.GetCurrentProcess().TotalProcessorTime;
 
                 var cpuTotalProcessorTime = (endTotalProcessorTime - startTotalProcessorTime).TotalMilliseconds;

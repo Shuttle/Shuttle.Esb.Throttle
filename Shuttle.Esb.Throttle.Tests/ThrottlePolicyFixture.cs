@@ -15,11 +15,11 @@ public class ThrottlePolicyFixture
         Assert.That(policy.ShouldAbort(), Is.False);
 
         var aborted = false;
-        var timeout = DateTime.Now.AddSeconds(2);
+        var timeout = DateTimeOffset.Now.AddSeconds(2);
 
         policy = new(Options.Create(new ThrottleOptions { CpuUsagePercentage = 1 }));
 
-        while (!aborted && DateTime.Now < timeout)
+        while (!aborted && DateTimeOffset.Now < timeout)
         {
             aborted = policy.ShouldAbort();
         }
